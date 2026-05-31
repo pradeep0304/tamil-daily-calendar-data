@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Subtle drop shadow for the sheet -->
+    <path
+        android:fillColor="#40000000"
+        android:pathData="M 33 33 L 79 33 A 4 4 0 0 1 83 37 L 83 83 A 4 4 0 0 1 79 87 L 33 87 A 4 4 0 0 1 29 83 L 29 37 A 4 4 0 0 1 33 33 Z" />
+
+    <!-- Calendar Paper Card Base (Warm cream-gold paper sheet) -->
+    <path
+        android:fillColor="#FFFDF9"
+        android:pathData="M 32 30 L 78 30 A 4 4 0 0 1 82 34 L 82 80 A 4 4 0 0 1 78 84 L 32 84 A 4 4 0 0 1 28 80 L 28 34 A 4 4 0 0 1 32 30 Z" />
+
+    <!-- Traditional Crimson Top Header Block of the Daily Sheet -->
+    <path
+        android:fillColor="#af101a"
+        android:pathData="M 32 30 L 78 30 A 4 4 0 0 1 82 34 L 82 46 L 28 46 L 28 34 A 4 4 0 0 1 32 30 Z" />
+
+    <!-- Calendar hanging metallic loops / rings (Left and Right) -->
+    <path
+        android:fillColor="#FBE09C"
+        android:pathData="M 38 24 A 2 2 0 0 1 42 24 L 42 34 A 2 2 0 0 1 38 34 Z" />
+    <path
+        android:fillColor="#FBE09C"
+        android:pathData="M 68 24 A 2 2 0 0 1 72 24 L 72 34 A 2 2 0 0 1 68 34 Z" />
+
+    <!-- White highlights inside Header (simulating the ring punch holes) -->
+    <path
+        android:fillColor="#FFFDF9"
+        android:pathData="M 40 34 A 1.5 1.5 0 1 1 40 31 A 1.5 1.5 0 0 1 40 34 Z" />
+    <path
+        android:fillColor="#FFFDF9"
+        android:pathData="M 70 34 A 1.5 1.5 0 1 1 70 31 A 1.5 1.5 0 0 1 70 34 Z" />
+
+    <!-- Decorative golden lines in Header representing spiritual text structure -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 46 35 L 64 35 M 48 39 L 62 39"
+        android:strokeWidth="1.2"
+        android:strokeColor="#FFD700" />
+
+    <!-- Big Centerpiece: Traditional Auspicious Sun Symbol (Suriya) inside the paper sheet -->
+    <path
+        android:fillColor="#FFB300"
+        android:pathData="M 55 64 A 6 6 0 1 1 55 52 A 6 6 0 0 1 55 64 Z" />
+
+    <!-- Radiating Sun Rays in deep orange-red and gold -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 55 49 L 55 45 M 55 67 L 55 71 M 46 58 L 42 58 M 64 58 L 68 58 M 49 52 L 46 49 M 61 64 L 64 67 M 49 64 L 46 67 M 61 52 L 64 49"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeColor="#FF6D00" />
+
+    <!-- Auspicious Kalasam / Lotus Base decoration (subtle lines representing Panchangam calendar) -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 36 76 L 74 76"
+        android:strokeWidth="1.5"
+        android:strokeColor="#eae8e2" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 42 80 L 68 80"
+        android:strokeWidth="1"
+        android:strokeColor="#e4e2dd" />
+
+</vector>

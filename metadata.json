@@ -1,0 +1,6 @@
+{
+  "name": "Tamil Daily Calendar Pro",
+  "description": "Premium Tamil Daily and Monthly Calendar app featuring traditional Panchangam info, auspicious/inauspicious timings, and heritage festival guides with a beautiful Material 3 bento dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
