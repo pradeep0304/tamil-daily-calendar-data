@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.testTag
 import com.example.t
 
 @Composable
@@ -134,7 +135,7 @@ fun PoruthamInputScreen(viewModel: PoruthamViewModel, isTamil: Boolean) {
                         viewModel.updateBrideName(brideName)
                         viewModel.checkCompatibility(groomName, brideName)
                     },
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().testTag("check_compatibility_button"),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     contentPadding = PaddingValues(0.dp)
                 ) {
@@ -206,17 +207,21 @@ fun PersonDetailsCard(
                     leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = {
-                            val calendar = java.util.Calendar.getInstance()
-                            if (activity != null) {
-                                android.app.DatePickerDialog(
-                                    activity,
-                                    { _, year, month, day ->
-                                        onDobChange(String.format("%02d/%02d/%04d", day, month + 1, year))
-                                    },
-                                    calendar.get(java.util.Calendar.YEAR),
-                                    calendar.get(java.util.Calendar.MONTH),
-                                    calendar.get(java.util.Calendar.DAY_OF_MONTH)
-                                ).show()
+                            try {
+                                val calendar = java.util.Calendar.getInstance()
+                                if (activity != null) {
+                                    android.app.DatePickerDialog(
+                                        activity,
+                                        { _, year, month, day ->
+                                            onDobChange(String.format("%02d/%02d/%04d", day, month + 1, year))
+                                        },
+                                        calendar.get(java.util.Calendar.YEAR),
+                                        calendar.get(java.util.Calendar.MONTH),
+                                        calendar.get(java.util.Calendar.DAY_OF_MONTH)
+                                    ).show()
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
                             }
                         }) {
                             Icon(Icons.Default.EditCalendar, contentDescription = "Select Date")
@@ -231,20 +236,24 @@ fun PersonDetailsCard(
                     leadingIcon = { Icon(Icons.Default.Schedule, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = {
-                            val calendar = java.util.Calendar.getInstance()
-                            if (activity != null) {
-                                android.app.TimePickerDialog(
-                                    activity,
-                                    { _, hourOfDay, minute ->
-                                        val isPm = hourOfDay >= 12
-                                        val hour = if (hourOfDay % 12 == 0) 12 else hourOfDay % 12
-                                        val amPm = if (isPm) "PM" else "AM"
-                                        onTobChange(String.format("%02d:%02d %s", hour, minute, amPm))
-                                    },
-                                    calendar.get(java.util.Calendar.HOUR_OF_DAY),
-                                    calendar.get(java.util.Calendar.MINUTE),
-                                    false
-                                ).show()
+                            try {
+                                val calendar = java.util.Calendar.getInstance()
+                                if (activity != null) {
+                                    android.app.TimePickerDialog(
+                                        activity,
+                                        { _, hourOfDay, minute ->
+                                            val isPm = hourOfDay >= 12
+                                            val hour = if (hourOfDay % 12 == 0) 12 else hourOfDay % 12
+                                            val amPm = if (isPm) "PM" else "AM"
+                                            onTobChange(String.format("%02d:%02d %s", hour, minute, amPm))
+                                        },
+                                        calendar.get(java.util.Calendar.HOUR_OF_DAY),
+                                        calendar.get(java.util.Calendar.MINUTE),
+                                        false
+                                    ).show()
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
                             }
                         }) {
                             Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Select Time")
@@ -447,7 +456,18 @@ fun PoruthamResultScreen(viewModel: PoruthamViewModel, isTamil: Boolean) {
                 ) {
                     Text(t("Save Report", isTamil))
                 }
-                Button(onClick = { /* Share */ }, modifier = Modifier.weight(1f)) {
+                Button(
+                    onClick = { 
+                        val shareText = "${t("Porutham Match Score", isTamil)}: $score%\n${t("Checked via Tamil Daily Calendar app", isTamil)}"
+                        val shareIntent = android.content.Intent().apply {
+                            action = android.content.Intent.ACTION_SEND
+                            putExtra(android.content.Intent.EXTRA_TEXT, shareText)
+                            type = "text/plain"
+                        }
+                        context.startActivity(android.content.Intent.createChooser(shareIntent, t("Share", isTamil)))
+                    }, 
+                    modifier = Modifier.weight(1f).testTag("share_button")
+                ) {
                     Text(t("Share", isTamil))
                 }
             }

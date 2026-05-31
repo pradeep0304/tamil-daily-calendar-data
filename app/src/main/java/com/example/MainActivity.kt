@@ -40,6 +40,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Celebration
@@ -409,13 +411,6 @@ fun SplashScreen(onSkip: () -> Unit) {
                         fontWeight = FontWeight.Bold
                     )
                 )
-                Text(
-                    text = "Publisher ID: pub-3244378896899982",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Light
-                    )
-                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -451,11 +446,15 @@ fun SplashScreen(onSkip: () -> Unit) {
 @Composable
 fun MainAppContent(poruthamViewModel: com.example.ui.PoruthamViewModel) {
     val viewModel: CalendarViewModel = viewModel()
+    
+    // Request location once per session, regardless of tab
+    LocationWeatherHandler(viewModel)
+
     val activeTab by viewModel.activeTab.collectAsState()
     val isTamil by viewModel.isTamilLanguage.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
 
-    val dayInfo = viewModel.getSelectedDayInfo()
+    val dayInfo = remember(selectedDate) { com.example.data.CalendarModel.getTamilDayInfo(selectedDate) }
 
     Scaffold(
         modifier = Modifier
@@ -665,7 +664,6 @@ fun BottomNavBar(viewModel: CalendarViewModel, activeTab: CalendarTab, isTamil: 
 
 @Composable
 fun DailyScreen(viewModel: CalendarViewModel, isTamil: Boolean, dayInfo: CalendarDayInfo) {
-    LocationWeatherHandler(viewModel)
     val weatherSummary by viewModel.weatherSummary.collectAsState()
 
     LazyColumn(
@@ -678,10 +676,22 @@ fun DailyScreen(viewModel: CalendarViewModel, isTamil: Boolean, dayInfo: Calenda
 
         // 1. Giant Gregorian Date Header Card
         item {
+            val context = LocalContext.current
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { viewModel.selectToday() }
+                    .clickable { 
+                        val currentDate = viewModel.selectedDate.value
+                        android.app.DatePickerDialog(
+                            context,
+                            { _, year, month, dayOfMonth ->
+                                viewModel.selectDate(LocalDate.of(year, month + 1, dayOfMonth))
+                            },
+                            currentDate.year,
+                            currentDate.monthValue - 1,
+                            currentDate.dayOfMonth
+                        ).show()
+                    }
                     .testTag("gregorian_date_card"),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
@@ -693,54 +703,102 @@ fun DailyScreen(viewModel: CalendarViewModel, isTamil: Boolean, dayInfo: Calenda
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(24.dp)
                 ) {
-                    val monthYear = "${t(dayInfo.gregorianDate.month.name, isTamil)} ${dayInfo.gregorianDate.year}"
-                    Text(
-                        text = monthYear.uppercase(Locale.getDefault()),
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            letterSpacing = 2.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = dayInfo.gregorianDate.dayOfMonth.toString(),
-                        style = MaterialTheme.typography.displayLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = t(dayInfo.gregorianDate.dayOfWeek.name, isTamil),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { viewModel.prevDay() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Previous Day",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            val monthYear = "${t(dayInfo.gregorianDate.month.name, isTamil)} ${dayInfo.gregorianDate.year}"
+                            Text(
+                                text = monthYear.uppercase(Locale.getDefault()),
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    letterSpacing = 2.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                                )
+                            )
+        
+                            Spacer(modifier = Modifier.height(4.dp))
+        
+                            Text(
+                                text = dayInfo.gregorianDate.dayOfMonth.toString(),
+                                style = MaterialTheme.typography.displayLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            )
+        
+                            Spacer(modifier = Modifier.height(4.dp))
+        
+                            Text(
+                                text = t(dayInfo.gregorianDate.dayOfWeek.name, isTamil),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.sp,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            // Moon Phase Indicator
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                val isWaning = dayInfo.tithi.contains("தேய்பிறை")
+                                val moonText = when {
+                                    dayInfo.isPournami -> "Pournami"
+                                    dayInfo.isAmavasai -> "Amavasai"
+                                    isWaning -> "Theipirai"
+                                    else -> "Valarpirai"
+                                }
+                                MoonPhaseIcon(
+                                    modifier = Modifier.size(16.dp),
+                                    isPournami = dayInfo.isPournami,
+                                    isAmavasai = dayInfo.isAmavasai,
+                                    isWaning = isWaning
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = t(moonText, isTamil),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                            }
+                        }
+                        IconButton(onClick = { viewModel.nextDay() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Next Day",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
                     
                     if (weatherSummary != null) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Card(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                text = weatherSummary!!,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Bold
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = weatherSummary!!,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
@@ -1263,14 +1321,26 @@ fun MonthlyScreen(viewModel: CalendarViewModel, isTamil: Boolean, selectedDate: 
                                                         }
                                                     )
                                                 )
-                                                if (hasFestival) {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .size(5.dp)
-                                                            .clip(CircleShape)
-                                                            .background(
-                                                                if (isSelected) Color.White else MaterialTheme.colorScheme.secondary
-                                                            )
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    if (hasFestival) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .size(5.dp)
+                                                                .clip(CircleShape)
+                                                                .background(
+                                                                    if (isSelected) Color.White else MaterialTheme.colorScheme.secondary
+                                                                )
+                                                        )
+                                                    }
+                                                    val isWaning = cellInfo.tithi.contains("தேய்பிறை")
+                                                    MoonPhaseIcon(
+                                                        modifier = Modifier.size(8.dp).padding(top=1.dp),
+                                                        isPournami = cellInfo.isPournami,
+                                                        isAmavasai = cellInfo.isAmavasai,
+                                                        isWaning = isWaning
                                                     )
                                                 }
                                             }
@@ -1479,6 +1549,14 @@ fun MonthlyScreen(viewModel: CalendarViewModel, isTamil: Boolean, selectedDate: 
 fun FestivalsScreen(viewModel: CalendarViewModel, isTamil: Boolean) {
     val festivals by viewModel.filteredFestivals.collectAsState(initial = emptyList())
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val selectedDate by viewModel.selectedDate.collectAsState()
+
+    val sortedFestivals = remember(festivals, selectedDate.monthValue) {
+        val currentMonthFestivals = festivals.filter { it.gregorianDate.monthValue == selectedDate.monthValue }
+        val upcomingFestivals = festivals.filter { it.gregorianDate.monthValue > selectedDate.monthValue }
+        val pastFestivals = festivals.filter { it.gregorianDate.monthValue < selectedDate.monthValue }
+        currentMonthFestivals + upcomingFestivals + pastFestivals
+    }
 
     Column(
         modifier = Modifier
@@ -1496,7 +1574,7 @@ fun FestivalsScreen(viewModel: CalendarViewModel, isTamil: Boolean) {
         ) {
             Column {
                 Text(
-                    text = t("Festivals 2024 - 2025", isTamil),
+                    text = t("Festivals", isTamil),
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -1509,11 +1587,18 @@ fun FestivalsScreen(viewModel: CalendarViewModel, isTamil: Boolean) {
                     )
                 )
             }
-            Icon(
-                imageVector = Icons.Default.Tune,
-                contentDescription = "Tune",
-                tint = MaterialTheme.colorScheme.secondary
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { viewModel.selectDate(selectedDate.minusYears(1)) }) {
+                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Year", tint = MaterialTheme.colorScheme.primary)
+                }
+                Text(
+                    text = selectedDate.year.toString(),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                )
+                IconButton(onClick = { viewModel.selectDate(selectedDate.plusYears(1)) }) {
+                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Year", tint = MaterialTheme.colorScheme.primary)
+                }
+            }
         }
 
         // Live Search Input (Inside screen as well)
@@ -1547,7 +1632,7 @@ fun FestivalsScreen(viewModel: CalendarViewModel, isTamil: Boolean) {
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            if (festivals.isEmpty()) {
+            if (sortedFestivals.isEmpty()) {
                 item {
                     Column(
                         modifier = Modifier
@@ -1572,7 +1657,7 @@ fun FestivalsScreen(viewModel: CalendarViewModel, isTamil: Boolean) {
                     }
                 }
             } else {
-                items(festivals) { item ->
+                items(sortedFestivals) { item ->
                     FestivalRowItem(item = item, isTamil = isTamil, onSelect = {
                         viewModel.selectDate(item.gregorianDate)
                         viewModel.setActiveTab(CalendarTab.DAILY)
@@ -2180,6 +2265,10 @@ fun t(key: String, isTamil: Boolean): String {
         "Soolam" -> "சூலம்"
         "Parigaram" -> "பரிகாரம்"
         "Karanam" -> "கரணம்"
+        "Pournami" -> "பௌர்ணமி (Full Moon)"
+        "Amavasai" -> "அமாவாசை (New Moon)"
+        "Valarpirai" -> "வளர்பிறை (Waxing)"
+        "Theipirai" -> "தேய்பிறை (Waning)"
         "Wisdom" -> "திருக்குறள்"
         "Auspicious Day" -> "மங்கல பொழுது"
         "Panchangam Info" -> "பஞ்சாங்க விவரம்"
@@ -2223,5 +2312,54 @@ fun t(key: String, isTamil: Boolean): String {
         "NOVEMBER" -> "நவம்பர்"
         "DECEMBER" -> "டிசம்பர்"
         else -> key
+    }
+}
+
+@Composable
+fun MoonPhaseIcon(modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier, isPournami: Boolean, isAmavasai: Boolean, isWaning: Boolean) {
+    androidx.compose.foundation.Canvas(modifier = modifier) {
+        val radius = size.minDimension / 2f
+        val center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
+        
+        when {
+            isPournami -> {
+                drawCircle(color = androidx.compose.ui.graphics.Color(0xFFFFF176), radius = radius, center = center)
+            }
+            isAmavasai -> {
+                drawCircle(color = androidx.compose.ui.graphics.Color.DarkGray, radius = radius, center = center)
+            }
+            isWaning -> {
+                // Waning - Left side illuminated
+                drawCircle(color = androidx.compose.ui.graphics.Color.DarkGray, radius = radius, center = center)
+                drawArc(
+                    color = androidx.compose.ui.graphics.Color(0xFFFFF176),
+                    startAngle = 90f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = androidx.compose.ui.geometry.Offset(center.x - radius, center.y - radius),
+                    size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2)
+                )
+            }
+            else -> {
+                // Waxing - Right side illuminated
+                drawCircle(color = androidx.compose.ui.graphics.Color.DarkGray, radius = radius, center = center)
+                drawArc(
+                    color = androidx.compose.ui.graphics.Color(0xFFFFF176),
+                    startAngle = -90f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = androidx.compose.ui.geometry.Offset(center.x - radius, center.y - radius),
+                    size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2)
+                )
+            }
+        }
+        
+        // Outline
+        drawCircle(
+            color = androidx.compose.ui.graphics.Color.Gray.copy(alpha = 0.5f),
+            radius = radius,
+            center = center,
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1f)
+        )
     }
 }

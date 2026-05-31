@@ -26,7 +26,9 @@ data class CalendarDayInfo(
     val festivalName: String?,
     val festivalDetail: String?,
     val isGovernmentHoliday: Boolean = false,
-    val rasi: String = "ரிஷபம்"
+    val rasi: String = "ரிஷபம்",
+    val isAmavasai: Boolean = false,
+    val isPournami: Boolean = false
 )
 
 object CalendarModel {
@@ -68,13 +70,30 @@ object CalendarModel {
         // Deterministic cycle based on epoch days for Tithi, Nakshatram, and Rasi
         val epochDays = date.toEpochDay()
         
-        // Base starting seed offset: May 25, 2025 is Ekadasi (index 10), Astham (index 12), Rishabham (index 1)
-        val tithiIndex = ((epochDays - 20233L + 10) % 30 + 30) % 30
-        val nakshatramIndex = ((epochDays - 20233L + 12) % 27 + 27) % 27
-        val rasiIndex = ((epochDays - 20233L + 1) % 12 + 12) % 12
+        // --- Tithi (Moon Phase) Calculation ---
+        // Synodic month is ~29.530588 days.
+        // We calibrate to a known Full Moon: May 31, 2026 (epoch day 20604).
+        // Index 14 in 'tithis' is Pournami.
+        val synodicMonth = 29.530588
+        val knownFullMoonEpoch = 20604.0 
+        var moonAge = (epochDays - knownFullMoonEpoch + (14.5 * synodicMonth / 30.0)) % synodicMonth
+        if (moonAge < 0) moonAge += synodicMonth
+        
+        val tithiIndex = ((moonAge / synodicMonth) * 30).toInt().coerceIn(0, 29)
+        val selectedTithi = tithis[tithiIndex]
 
-        val selectedTithi = tithis[tithiIndex.toInt()]
-        val selectedNakshatram = nakshatrams[nakshatramIndex.toInt()]
+        // --- Nakshatram (Moon position in Sky) Calculation ---
+        // Sidereal month is ~27.321661 days.
+        // May 31 2026 is roughly Anuradha (Anusham) - index 16.
+        val siderealMonth = 27.321661
+        val knownNakshatramEpoch = 20604.0
+        var nakshatraAge = (epochDays - knownNakshatramEpoch + (16.5 * siderealMonth / 27.0)) % siderealMonth
+        if (nakshatraAge < 0) nakshatraAge += siderealMonth
+        
+        val nakshatramIndex = ((nakshatraAge / siderealMonth) * 27).toInt().coerceIn(0, 26)
+        val selectedNakshatram = nakshatrams[nakshatramIndex]
+
+        val rasiIndex = ((epochDays - 20233L + 1) % 12 + 12) % 12
         val selectedRasi = rasis[rasiIndex.toInt()]
 
         // Rahu, Yamagandam, Kuligai are deterministic by Day of Week
@@ -111,7 +130,9 @@ object CalendarModel {
             festivalName = festName,
             festivalDetail = festDetail,
             isGovernmentHoliday = isGovHoliday,
-            rasi = selectedRasi
+            rasi = selectedRasi,
+            isAmavasai = selectedTithi == "அமாவாசை",
+            isPournami = selectedTithi == "பௌர்ணமி"
         )
     }
 
