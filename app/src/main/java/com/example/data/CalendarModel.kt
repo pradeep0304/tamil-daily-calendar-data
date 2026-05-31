@@ -196,10 +196,10 @@ object CalendarModel {
         // Returns Triple(Rahu, Yamagandam, Kuligai)
         return when (day) {
             DayOfWeek.SUNDAY -> Triple("04:30 - 06:00", "12:00 - 01:30", "03:00 - 04:30")
-            DayOfWeek.MONDAY -> Triple("07:30 - 09:00", "01:30 - 03:00", "12:00 - 01:30")
-            DayOfWeek.TUESDAY -> Triple("03:00 - 04:30", "10:30 - 12:00", "09:00 - 10:30")
-            DayOfWeek.WEDNESDAY -> Triple("12:00 - 01:30", "09:00 - 10:30", "10:30 - 12:00")
-            DayOfWeek.THURSDAY -> Triple("01:30 - 03:00", "07:30 - 09:00", "09:00 - 10:30")
+            DayOfWeek.MONDAY -> Triple("07:30 - 09:00", "10:30 - 12:00", "01:30 - 03:00")
+            DayOfWeek.TUESDAY -> Triple("03:00 - 04:30", "09:00 - 10:30", "12:00 - 01:30")
+            DayOfWeek.WEDNESDAY -> Triple("12:00 - 01:30", "07:30 - 09:00", "10:30 - 12:00")
+            DayOfWeek.THURSDAY -> Triple("01:30 - 03:00", "06:00 - 07:30", "09:00 - 10:30")
             DayOfWeek.FRIDAY -> Triple("10:30 - 12:00", "03:00 - 04:30", "07:30 - 09:00")
             DayOfWeek.SATURDAY -> Triple("09:00 - 10:30", "01:30 - 03:00", "06:00 - 07:30")
         }
@@ -208,11 +208,11 @@ object CalendarModel {
     private fun getNallaNeramMorning(day: DayOfWeek): String {
         return when (day) {
             DayOfWeek.SUNDAY -> "07:30 - 08:30"
-            DayOfWeek.MONDAY -> "06:15 - 07:15"
+            DayOfWeek.MONDAY -> "06:30 - 07:30"
             DayOfWeek.TUESDAY -> "07:30 - 08:30"
             DayOfWeek.WEDNESDAY -> "09:15 - 10:15"
-            DayOfWeek.THURSDAY -> "09:15 - 10:15"
-            DayOfWeek.FRIDAY -> "09:15 - 10:15"
+            DayOfWeek.THURSDAY -> "10:30 - 11:30"
+            DayOfWeek.FRIDAY -> "09:30 - 10:30"
             DayOfWeek.SATURDAY -> "07:30 - 08:30"
         }
     }
@@ -220,35 +220,35 @@ object CalendarModel {
     private fun getNallaNeramEvening(day: DayOfWeek): String {
         return when (day) {
             DayOfWeek.SUNDAY -> "03:30 - 04:30"
-            DayOfWeek.MONDAY -> "04:45 - 05:45"
-            DayOfWeek.TUESDAY -> "04:45 - 05:45"
+            DayOfWeek.MONDAY -> "04:30 - 05:30"
+            DayOfWeek.TUESDAY -> "04:30 - 05:30"
             DayOfWeek.WEDNESDAY -> "04:45 - 05:45"
-            DayOfWeek.THURSDAY -> "06:15 - 07:15"
-            DayOfWeek.FRIDAY -> "04:45 - 05:45"
-            DayOfWeek.SATURDAY -> "05:15 - 06:15"
+            DayOfWeek.THURSDAY -> "-"
+            DayOfWeek.FRIDAY -> "04:30 - 05:30"
+            DayOfWeek.SATURDAY -> "04:30 - 05:30"
         }
     }
 
     private fun getGowriNallaNeramMorning(day: DayOfWeek): String {
         return when (day) {
-            DayOfWeek.SUNDAY -> "10:30 - 11:30"
-            DayOfWeek.MONDAY -> "10:30 - 11:30"
-            DayOfWeek.TUESDAY -> "12:00 - 01:00"
+            DayOfWeek.SUNDAY -> "02:00 - 03:00"
+            DayOfWeek.MONDAY -> "09:30 - 10:30"
+            DayOfWeek.TUESDAY -> "10:30 - 11:30"
             DayOfWeek.WEDNESDAY -> "12:00 - 01:00"
             DayOfWeek.THURSDAY -> "12:00 - 01:00"
-            DayOfWeek.FRIDAY -> "12:15 - 01:15"
+            DayOfWeek.FRIDAY -> "12:00 - 01:00"
             DayOfWeek.SATURDAY -> "10:30 - 11:30"
         }
     }
 
     private fun getGowriNallaNeramEvening(day: DayOfWeek): String {
         return when (day) {
-            DayOfWeek.SUNDAY -> "01:30 - 02:30"
-            DayOfWeek.MONDAY -> "01:30 - 02:30"
-            DayOfWeek.TUESDAY -> "04:30 - 05:30"
-            DayOfWeek.WEDNESDAY -> "03:30 - 04:30"
+            DayOfWeek.SUNDAY -> "07:30 - 08:30"
+            DayOfWeek.MONDAY -> "07:30 - 08:30"
+            DayOfWeek.TUESDAY -> "10:30 - 11:30"
+            DayOfWeek.WEDNESDAY -> "09:30 - 10:30"
             DayOfWeek.THURSDAY -> "07:30 - 08:30"
-            DayOfWeek.FRIDAY -> "06:30 - 07:30"
+            DayOfWeek.FRIDAY -> "09:30 - 10:30"
             DayOfWeek.SATURDAY -> "07:30 - 08:30"
         }
     }
